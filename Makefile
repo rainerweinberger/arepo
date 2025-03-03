@@ -87,6 +87,26 @@ HWLOC_INCL=
 endif
 # end of Ubuntu
 
+# e.g. Mac OS using homebrew modules for openmpi, fftw, gsl, hdf5 and hwloc
+ifeq ($(SYSTYPE),"macOShomebrew")
+# compiler and its optimization options
+CC        =  mpicc   # sets the C-compiler
+OPTIMIZE  =  -std=c11 -ggdb -O3 -Wall -Wno-format-security -Wno-unknown-pragmas -Wno-unused-function
+
+# overwrite default:
+MPICH_LIB = -lmpi
+GSL_INCL  = -I/opt/homebrew/include
+GSL_LIB   = -L/opt/homebrew/lib -lgsl -lgslcblas
+HWLOC_LIB = -L/opt/homebrew/lib -lhwloc
+
+# libraries that are included on demand, depending on Config.sh options
+FFTW_INCL = -I/opt/homebrew/include -I/usr/local/include
+FFTW_LIBS = -L/opt/homebrew/lib -I/usr/local/lib
+HDF5_INCL = -I/opt/homebrew/include -DH5_USE_16_API
+HDF5_LIB  = -L/opt/homebrew/lib  -lhdf5 -lz
+HWLOC_INCL= -I/opt/homebrew/include
+endif
+# end of macOShomebrew
 
 # insert the library paths for your system here, similar to SYSTYPE "Darwin" above
 
