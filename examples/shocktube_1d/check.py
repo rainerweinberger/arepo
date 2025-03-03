@@ -14,6 +14,10 @@ plt.rcParams['text.usetex'] = True
 
 from Riemann import *    ## Riemann-solver
 
+## ensure calculations happen with predefined precision
+FloatType = np.float64  # double precision: np.float64, for single use np.float32
+IntType = np.int32 # integer type
+
 makeplots = True
 if len(sys.argv) > 2:
   if sys.argv[2] == "True":
@@ -50,7 +54,7 @@ def CheckL1Error(Pos, W, W_L, W_R, gamma, position_0, time):
     L1 = np.average(delta, axis=0)
     
     ## tolarance value; found empirically, fist order convergence!
-    L1MaxAllowed = 2.0 / np.float(Pos.shape[0])
+    L1MaxAllowed = 2.0 / FloatType(Pos.shape[0])
     
     if np.any(L1 > L1MaxAllowed):
         print("CheckL1Error: ERROR: L1 error too large: %g %g %g; tolerance %g"% (L1[0], L1[1], L1[2], L1MaxAllowed) )
@@ -138,9 +142,9 @@ def CheckWidthOfDiscontinuities(Pos, W, W_L, W_R, gamma, position_0, time):
         percentile_95 = np.max( percentiles, axis=0 )
         i_sorted = np.argsort( np.abs(Pos-pos_char-position_0) )
         
-        i_low = np.full(3, i_sorted[0], dtype=np.int32)
-        i_high = np.full(3, i_sorted[0], dtype=np.int32)
-        max_jump_per_cell  = np.zeros(3, dtype=np.float64)
+        i_low = np.full(3, i_sorted[0], dtype=IntType)
+        i_high = np.full(3, i_sorted[0], dtype=IntType)
+        max_jump_per_cell  = np.zeros(3, dtype=FloatType)
         
         ## check by how many cells 5th to 95th percentile of jump are sampled
         for j in np.arange(3):
@@ -248,7 +252,6 @@ def PlotSimulationData(Pos, W, W_L, W_R, gamma, position_0, time, simulation_dir
 simulation_directory = str(sys.argv[1])
 print("shocktube_1d: checking simulation output in directory " + simulation_directory) 
 
-Dtype = np.float64  # double precision: np.float64, for single use np.float32
 ## open initial conditiions to get parameters
 directory = simulation_directory+"/"
 filename = "IC.hdf5" 
@@ -257,12 +260,12 @@ try:
 except:
     print( "Could not find file {0}".format(directory+filename) )
     sys.exit(1)
-IC_position = np.array(data["PartType0"]["Coordinates"], dtype = np.float64)
-IC_mass = np.array(data["PartType0"]["Masses"], dtype = np.float64)
-IC_velocity = np.array(data["PartType0"]["Velocities"], dtype = np.float64)
-IC_internalEnergy = np.array(data["PartType0"]["InternalEnergy"], dtype = np.float64)
-NumberOfCells = np.int32(data["Header"].attrs["NumPart_Total"][0])
-DeltaMaxAllowed = 2.0 / np.float(NumberOfCells)
+IC_position = np.array(data["PartType0"]["Coordinates"], dtype = FloatType)
+IC_mass = np.array(data["PartType0"]["Masses"], dtype = FloatType)
+IC_velocity = np.array(data["PartType0"]["Velocities"], dtype = FloatType)
+IC_internalEnergy = np.array(data["PartType0"]["InternalEnergy"], dtype = FloatType)
+NumberOfCells = IntType(data["Header"].attrs["NumPart_Total"][0])
+DeltaMaxAllowed = 2.0 / FloatType(NumberOfCells)
 
 ## get parameters of Riemann problem from ICs
 gamma = 1.4  ## needs to be identical to Config.sh =(5./3.) if not specified there!
@@ -276,9 +279,9 @@ position_0 = 0.5 * (IC_position[i_0[0]-1,0]+IC_position[i_0[0],0]) ## discontinu
 i_file = -1
 ReturnFlag = 0
 
-time_arr = np.empty(shape=(0,1), dtype=np.float64)
-jump_arr = np.empty(shape=(0,5), dtype=np.float64) # 5 characteristics
-tv_arr = np.empty(shape=(0,3), dtype=np.float64)
+time_arr = np.empty(shape=(0,1), dtype=FloatType)
+jump_arr = np.empty(shape=(0,5), dtype=FloatType) # 5 characteristics
+tv_arr = np.empty(shape=(0,3), dtype=FloatType)
 
 while True:
     i_file += 1
@@ -295,13 +298,13 @@ while True:
     print("analyzing "+ filename)
     
     ## get data from snapshot
-    time = np.float( data["Header"].attrs["Time"] )
-    position = np.array(data["PartType0"]["Coordinates"], dtype = np.float64)
-    density = np.array(data["PartType0"]["Density"], dtype = np.float64)
-    vel = np.array(data["PartType0"]["Velocities"], dtype = np.float64)
-    internalEnergy = np.array(data["PartType0"]["InternalEnergy"], dtype = np.float64)
+    time = FloatType( data["Header"].attrs["Time"] )
+    position = np.array(data["PartType0"]["Coordinates"], dtype = FloatType)
+    density = np.array(data["PartType0"]["Density"], dtype = FloatType)
+    vel = np.array(data["PartType0"]["Velocities"], dtype = FloatType)
+    internalEnergy = np.array(data["PartType0"]["InternalEnergy"], dtype = FloatType)
     ## convert to more useful data structure
-    W = np.array([density, vel[:,0], (gamma-1.0)*internalEnergy*density], dtype=np.float64).T ## shape: (n,3)
+    W = np.array([density, vel[:,0], (gamma-1.0)*internalEnergy*density], dtype=FloatType).T ## shape: (n,3)
     
     
     """ plot data if you want """
@@ -333,8 +336,8 @@ while True:
     jump_arr = np.concatenate((jump_arr, np.array(jump_per_cell_list, ndmin=2)), axis=0)
     tv_arr = np.concatenate((tv_arr, np.array(tv, ndmin=2)), axis=0)
 
-jump_arr = np.array(jump_arr, dtype=np.float64)
-tv_arr = np.array(tv_arr, dtype=np.float64)
+jump_arr = np.array(jump_arr, dtype=FloatType)
+tv_arr = np.array(tv_arr, dtype=FloatType)
 data = np.array([time_arr[:,0], jump_arr[:,2], jump_arr[:,3], tv_arr[:,0], tv_arr[:,1], tv_arr[:,2]])
 np.savetxt(simulation_directory+'/jumps_total_variation.txt', data.T)
 

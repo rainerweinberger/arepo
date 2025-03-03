@@ -12,6 +12,10 @@ import os      # file specific calls
 import matplotlib.pyplot as plt    ## needs to be active for plotting!
 plt.rcParams['text.usetex'] = True
 
+## ensure calculations happen with predefined precision
+FloatType = np.float64  # double precision: np.float64, for single use np.float32
+IntType = np.int32 # integer type
+
 makeplots = True
 if len(sys.argv) > 2:
   if sys.argv[2] == "True":
@@ -43,10 +47,10 @@ def CheckL1Error(Pos, W, gamma, i_snap):
     
     ## match indices
     dx = xx[1] - xx[0]
-    index = np.array( (Pos - 0.5*dx) / dx, dtype=np.int32 )
+    index = np.array( (Pos - 0.5*dx) / dx, dtype=IntType )
     residual_x = Pos - xx[index]
     
-    W_predict = np.zeros([len(index), 3], dtype=np.float64)
+    W_predict = np.zeros([len(index), 3], dtype=FloatType)
     for k in np.arange(3):
         W_predict[:,k] = (1.0- residual_x/dx) * W_exact[index,k] + residual_x/dx * W_exact[index+1,k]
     norm = np.abs(W_predict)
@@ -57,7 +61,7 @@ def CheckL1Error(Pos, W, gamma, i_snap):
     L1 = np.average(delta, axis=0)
     
     ## tolarance value; found empirically, fist order convergence!
-    val_max = 0.05 * 400.0 / np.float(Pos.shape[0])
+    val_max = 0.05 * 400.0 / FloatType(Pos.shape[0])
     L1MaxAllowed = np.array([val_max, 4.0*val_max, val_max])
     
     if np.any(L1 > L1MaxAllowed):
@@ -142,7 +146,6 @@ simulation_directory = str(sys.argv[1])
 print("interacting_blastwaves_1d: checking simulation output in directory " + simulation_directory) 
 
 ##parameters
-Dtype = np.float64  # double precision: np.float64, for single use np.float32
 gamma = 1.4  ## needs to be identical to Config.sh =(5./3.) if not specified there!
 
 """ analyze snap_001.hdf5 """
@@ -161,13 +164,13 @@ except:
 print("analyzing "+ filename)
 
 ## get data from snapshot
-time = np.float( data["Header"].attrs["Time"] )
-position = np.array(data["PartType0"]["Coordinates"], dtype = Dtype)
-density = np.array(data["PartType0"]["Density"], dtype = Dtype)
-vel = np.array(data["PartType0"]["Velocities"], dtype = Dtype)
-internalEnergy = np.array(data["PartType0"]["InternalEnergy"], dtype = Dtype)
+time = FloatType( data["Header"].attrs["Time"] )
+position = np.array(data["PartType0"]["Coordinates"], dtype = FloatType)
+density = np.array(data["PartType0"]["Density"], dtype = FloatType)
+vel = np.array(data["PartType0"]["Velocities"], dtype = FloatType)
+internalEnergy = np.array(data["PartType0"]["InternalEnergy"], dtype = FloatType)
 ## convert to more useful data structure
-W = np.array([density, vel[:,0], (gamma-1.0)*internalEnergy*density], dtype=Dtype).T ## shape: (n,3)
+W = np.array([density, vel[:,0], (gamma-1.0)*internalEnergy*density], dtype=FloatType).T ## shape: (n,3)
 
 """ plot data if you want """
 if makeplots:
