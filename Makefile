@@ -111,18 +111,18 @@ endif
 #Newton at AIP
 ifeq ($(SYSTYPE), "Newton21")
   CC         = mpicc
-  OPTIMIZE   = -std=c11 -g -O3 -Wall
-  GMP_LIBS   = -lgmp
+  OPTIMIZE   = -std=c11 -g -O3 
+  GMP_LIB    = -lgmp
   GSL_INCL   = -I$(GSL_INC)
-  GSL_LIBS   = -L$(GSL_LIB) -lgsl -lgslcblas
-  MATH_LIBS   = -lm -lstdc++
+  GSL_LIB    = -L/opt/ohpc/pub/libs/gnu9/gsl/2.7/lib -lgsl -lgslcblas
+  MATH_LIB   = -lm -lstdc++
   FFTW_INCL  = -I/opt/ohpc/pub/libs/gnu9/openmpi4/fftw/3.3.8/include
   FFTW_LIBS  = -L/opt/ohpc/pub/libs/gnu9/openmpi4/fftw/3.3.8/lib
-  HWLOC_INCLS = -I$(HWLOC_INC)
-  HWLOC_LIBS  = -L$(HWLOC_LIB) -lhwloc
-  MPICH_LIBS   =
+  HWLOC_INCL := -I$(HWLOC_INC)
+  HWLOC_LIB   := -L$(HWLOC_LIB) -lhwloc
+  MPICH_LIB   =
   HDF5_INCL   = -I$(HDF5_INC) -DH5_USE_16_API=1
-  HDF5_LIBS    = -L$(HDF5_LIB) -lhdf5
+  HDF5_LIB    := -L$(HDF5_LIB) -lhdf5
 endif
 
 # insert the library paths for your system here, similar to SYSTYPE "Darwin" above
