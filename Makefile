@@ -108,6 +108,23 @@ HWLOC_INCL= -I/opt/homebrew/include
 endif
 # end of macOShomebrew
 
+#Newton at AIP
+ifeq ($(SYSTYPE), "Newton21")
+  CC         = mpicc
+  OPTIMIZE   = -std=c11 -g -O3 -Wall
+  GMP_LIBS   = -lgmp
+  GSL_INCL   = -I$(GSL_INC)
+  GSL_LIBS   = -L$(GSL_LIB) -lgsl -lgslcblas
+  MATH_LIBS   = -lm -lstdc++
+  FFTW_INCL  = -I/opt/ohpc/pub/libs/gnu9/openmpi4/fftw/3.3.8/include
+  FFTW_LIBS  = -L/opt/ohpc/pub/libs/gnu9/openmpi4/fftw/3.3.8/lib
+  HWLOC_INCLS = -I$(HWLOC_INC)
+  HWLOC_LIBS  = -L$(HWLOC_LIB) -lhwloc
+  MPICH_LIBS   =
+  HDF5_INCL   = -I$(HDF5_INC) -DH5_USE_16_API=1
+  HDF5_LIBS    = -L$(HDF5_LIB) -lhdf5
+endif
+
 # insert the library paths for your system here, similar to SYSTYPE "Darwin" above
 
 
